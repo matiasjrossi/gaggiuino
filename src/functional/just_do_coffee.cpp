@@ -85,20 +85,36 @@ void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool br
 //#############################################################################################
 
 void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
-    // steam temp control, needs to be aggressive to keep steam pressure acceptable
-  if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
+  steamBoilerCtrl(runningCfg, currentState);
+  #if not defined DISABLE_STEAM_BOOST
+    dreamSteam(runningCfg, currentState, brewActive);
+  #endif
+}
+
+void steamBoilerCtrl(eepromValues_t &runningCfg, SensorState &currentState) {
+  // steam temp control, needs to be aggressive to keep steam pressure acceptable
+  if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_TEMPERATURE) && (currentState.pressure <= 9.f)) {
     setBoilerOn();
-    brewActive ? setPumpFullOn() : setPumpOff();
-  }else if ((currentState.pressure <= 9.f) && (currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
-    setBoilerOn();
-    if (currentState.pressure < 1.5f) {
-      #if not defined SINGLE_BOARD
-        openValve();
-      #endif
-      setPumpToRawValue(5);
-    }
   } else {
     setBoilerOff();
-    (currentState.pressure < 1.5f) ? setPumpToRawValue(5) : setPumpOff();
+  }
+}
+
+void dreamSteam(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive) {
+  if ((currentState.temperature > runningCfg.setpoint - 10.f) && (currentState.temperature <= STEAM_WAND_HOT_WATER_TEMP)) {
+    if (brewActive) {
+      setPumpFullOn();
+    } else {
+      setPumpOff();
+    }
+  } else if (currentState.pressure < 1.5f) {
+    #if not defined SINGLE_BOARD
+      if ((currentState.temperature > STEAM_WAND_HOT_WATER_TEMP) && (currentState.temperature <= STEAM_TEMPERATURE)) {
+        openValve();
+      }
+    #endif
+    setPumpToRawValue(5);
+  } else {
+    setPumpOff();
   }
 }

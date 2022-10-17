@@ -15,6 +15,8 @@
 
 void justDoCoffee(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive, bool preinfusionFinished);
 void steamCtrl(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive);
+void steamBoilerCtrl(eepromValues_t &runningCfg, SensorState &currentState);
+void dreamSteam(eepromValues_t &runningCfg, SensorState &currentState, bool brewActive);
 
 #endif
 
