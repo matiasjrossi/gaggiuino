@@ -1,0 +1,11 @@
+#!/bin/sh
+
+REPO=$(dirname $0)/..
+SHIT2TEXT=${REPO}/scripts/Nextion2Text.py
+
+for HMI in $REPO/lcd-hmi/*.HMI; do
+  python ${SHIT2TEXT} -i ${HMI} -o ${HMI}_code -d -s -p visual >> ${REPO}/shit2text.log
+  git add ${HMI}_code
+done
+
+git commit -m 'Nextion dump diff' 2> /dev/null
